@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Drop</title>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.1.1/min/dropzone.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+
+	<style>
+*,*:before,*:after {
+	box-sizing: border-box;
+}
+
+html {
+	background-color: #D9D9D9;
+	overflow-x: hidden;
+}
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	font-size: 20px;
+}
+
+
+input, textarea {
+	font-size: 18px;
+	background: #FFFFFF;
+	border: 1px solid #979797;
+	box-shadow: inset 0 1px 3px 0 rgba(0,0,0,0.50);
+	border-radius: 3px;
+	padding: 5px;
+	width: 80%;
+}
+
+textarea {
+	font-size: 14px;
+	height: 100px;
+}
+
+label {
+	display: block;
+	font-weight: bold;
+	margin-top: 2em;
+	margin-bottom: 0.5em
+}
+
+button {
+	background-image: linear-gradient(-180deg, #D8D8D8 0%, #B3B3B3 100%);
+	border: 1px solid #979797;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.20), inset 0 2px 0 0 #FFFFFF;
+	border-radius: 6px;
+	padding: 5px 10px;
+
+	font-size: 16px;
+	font-weight: bold;
+	color: #4A4A4A;
+	letter-spacing: 0;
+	text-shadow: 0 1px 0 #FFFFFF;
+	position: relative;
+	outline: none;
+
+	display: inline-block;
+	cursor: pointer;
+}
+
+button:hover {
+	background-image: linear-gradient(-180deg, #E1E1E1 0%, #C0C0C0 100%);
+}
+
+button:active {
+	background-image: linear-gradient(0, #D8D8D8 0%, #B3B3B3 100%);
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.20), inset 0 2px 0 0 #888;
+	top: 1px;
+	outline: none;
+}
+
+template {
+	display: none;
+}
+
+.page-wrap {
+	max-width: 960px;
+	min-width: 500px;
+	width: 95%;
+
+	margin: 30px auto;
+	background-color: #FFF;
+	box-shadow: 0 0 50px #666;
+	padding: 50px;
+}
+
+.main-header {
+	width: 50%;
+	margin: 0 auto;
+	text-align: center;
+	margin-bottom: 4em;
+}
+
+.main-header__title {
+	font-weight: bold;
+	font-size: 24px;
+	margin: 0.5em 0;
+}
+
+.dropzone {
+	border: none;
+	padding: 0;
+}
+
+.dropzone-border {
+	background-color: #D9D9D9;
+	border: 3px dashed #424242;
+	margin-bottom: 3em;
+}
+
+.dropzone__info {
+	padding: 50px 20%;
+	text-align: center;
+	margin-bottom: 3em;
+}
+
+.dropzone-previews:after {
+	content: " "; /* Older browser do not support empty content */
+	visibility: hidden;
+	display: block;
+	height: 0;
+	clear: both;
+}
+
+.dz-drag-hover {
+	border: none !important;
+}
+
+.dz-drag-hover .dropzone-border {
+	border-color: red;
+}
+
+.dz-default {
+	display: none;
+}
+
+.thumbnail {
+	display: inline-block;
+	position: relative;
+	margin: 15px 0;
+}
+
+.thumbnail img {
+	height: 150px;
+	width: 150px;
+	margin: 0 15px;
+	border: 5px solid white;
+	object-fit: cover;
+}
+
+.thumbnail--info {
+	font-size: 0.5em;
+	max-width: 80%;
+	overflow: hidden;
+	margin: 0 15px;
+}
+
+.thumbnail--error {
+	font-size: 0.5em;
+	max-width: 80%;
+	color: red;
+	margin: 0 15px;
+}
+
+.thumbnail--delete {
+	position: absolute;
+	top: 0;
+	right: 0;
+	background: #eb493d;
+	width: 1.3em;
+	height: 1.3em;
+	color: white;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 1.45em;
+	text-decoration: none;
+	font-size: 1.2em;
+}
+
+.sidebar {
+	width: 25%;
+	flex: 0 0 auto;
+	padding-right: 10px;
+	border-right: 1px solid rgba(0,0,0,0.50);
+	margin-right: 10px;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+.image-list-item {
+	display: block;
+	height: 2em;
+	line-height: 2em;
+	text-align: center;
+	border-bottom: 1px solid rgba(0,0,0,0.50);
+}
+
+.image-list-item:last-child {
+	margin-bottom: 1em;
+	border-bottom: none;
+}
+
+.image-list-item.selected {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.image-view {
+	display: none;
+}
+
+.image-view.selected {
+	display: block;
+}
+	</style>
+</head>
+<body>
+	<div class="page-wrap">
+		<header class="main-header">
+			<img src="nameplate.svg" alt="The Bowdoin Orient" class="main-header__nameplate">
+			<p class="main-header__title">Photo Uploading Tool</p>
+		</header>
+
+		<form id="file-upload" class="dropzone" action="/file-upload.php">
+			<div class="dropzone-border">
+				<div id="dropzone-info" class="dropzone__info">
+					<h2>Please drag and drop .jpg files here.</h2>
+					<p class="dropzone__help-text">Do not strip EXIF data. Drag multiple files, not a folder. Image formats besides jpg and jpeg are not accepted. For questions see Jenny Ibsen.</p>
+					<button id="click-target" onclick="event.preventDefault();">Add from Computer</button>
+				</div>
+
+				<div class="dropzone-previews">
+					<template id="thumbnail">
+						<div class="thumbnail">
+							<img src="#" class="thumbnail--image" data-dz-thumbnail>
+							<a href="#" class="thumbnail--delete" data-dz-remove>&times;</a>
+							<p class="thumbnail--info"><span data-dz-name></span> <span data-dz-size></span></p>
+							<p class="thumbnail--error"><span data-dz-errormessage></span></p>
+						</div>
+					</template>
+				</div> <!-- this is were the previews should be shown. -->
+			</div>
+
+			<!-- Now setup your input fields -->
+			<label for="name">What is your name?</label>
+			<input type="text" name="name" placeholder="Jenny Ibsen" />
+
+			<label for="assignment">What was the photo assignment?</label>
+			<input type="text" name="assignment" placeholder="Battle of the Bands" />
+
+			<br><br><button type="submit">Upload Files</button>
+		</form>
+
+		<div id="upload-interstitial" style="display: none">
+			<p>Uploading images. This could take a while, so hold tight.</p>
+		</div>
+
+		<form id="file-info" action="/done.php" style="display: none" method="POST">
+			<input type="hidden" name="set_dir" id="set_dir"></input>
+			<div id="info-list" class="sidebar">
+				<template id="info-list-item">
+					<a class="image-list-item" data-imgname="" onclick="event.stopPropagation; selectUploadedImage(event)"></a>
+				</template>
+
+				<button type="submit">Send Photos</button>
+			</div>
+
+			<div class="image-review" id="image-review">
+				<template id="image-view">
+					<div class="image-view" data-imgname="">
+						<img src="">
+
+						<div class="clarification-form">
+							<p>Can you describe what’s happening in this photo?<br>Please identify people, give context, or clarify anything that’s confusing.</p>
+							<textarea name=""></textarea>
+						</div>
+					</div>
+				</template>
+			</div>
+		</form>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.1.1/min/dropzone.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+	<script>
+		NProgress.configure({ trickle: false });
+		Dropzone.options.fileUpload = { // The camelized version of the ID of the form element
+
+			// The configuration we've talked about above
+			autoProcessQueue: false,
+			uploadMultiple: true,
+			parallelUploads: 100,
+			maxFiles: 100,
+			acceptedFiles: 'image/jpeg',
+			clickable: "#click-target",
+			previewsContainer: ".dropzone-previews",
+			previewTemplate: document.querySelector("#thumbnail").innerHTML,
+
+			// The setting up of the dropzone
+			init: function() {
+				var myDropzone = this;
+
+				// First change the button to actually tell Dropzone to process the queue.
+				this.element.querySelector("button[type=submit]").addEventListener("click", function(e) {
+					// Make sure that the form isn't actually being sent.
+					e.preventDefault();
+					e.stopPropagation();
+					myDropzone.processQueue();
+				});
+
+				this.on("addedfile", function(e) {
+					document.querySelector('#dropzone-info').style.display = "none";
+				});
+
+				this.on("removedfile", function(e) {
+					if(myDropzone.files.length == 0) {
+						document.querySelector('#dropzone-info').style.display = "block";
+					}
+				});
+
+				// Listen to the sendingmultiple event. In this case, it's the sendingmultiple event instead
+				// of the sending event because uploadMultiple is set to true.
+				this.on("sendingmultiple", function() {
+					NProgress.start();
+					document.querySelector('#file-upload').style.display = "none";
+					document.querySelector('#upload-interstitial').style.display = "block";
+					// Gets triggered when the form is actually being sent.
+					// Hide the success button or the complete form.
+				});
+
+				this.on("uploadprogress", function(files, percentage, bytes) {
+					if(percentage != 100) {
+						NProgress.set(percentage / 100.0);
+					}
+				});
+
+				this.on("successmultiple", function(files, response) {
+					NProgress.done();
+					populateInfoForm(JSON.parse(response));
+					document.querySelector('#file-info').style.display = "flex";
+					document.querySelector('#upload-interstitial').style.display = "none";
+					// Gets triggered when the files have successfully been sent.
+					// Redirect user or notify of success.
+				});
+
+				this.on("errormultiple", function(files, response) {
+					// Gets triggered when there was an error sending the files.
+					document.querySelector('#file-upload').style.display = "block";
+					document.querySelector('#upload-interstitial').style.display = "none";
+					// Maybe show form again, and notify user of error
+				});
+			}
+		}
+
+		function populateInfoForm(obj) {
+			document.querySelector("#set_dir").value = obj.info;
+			console.log(document.querySelector("#set_dir").value);
+// 			localStorage.setItem('progress', obj.info);
+			console.log(obj);
+
+			Object.getOwnPropertyNames(obj.images).forEach(function(imgname){
+				var img = obj.images[imgname];
+				var filename = img['filename'];
+				var src = img['src'];
+				generateListItem(imgname, filename);
+				generateImageView(imgname, src);
+			});
+			visibleImageIndex = Object.keys(obj.images)[0];
+			console.log(Object.keys(obj.images)[0]);
+
+			document.querySelectorAll('[data-imgname="' + visibleImageIndex  + '"]').forEach(function(el) {
+				el.classList.add('selected');
+			});
+		}
+
+		function generateListItem(imgname, filename) {
+			var listitem = document.querySelector("#info-list-item");
+			listitem.content.querySelector("a").dataset.imgname = imgname;
+			listitem.content.querySelector("a").innerHTML = filename;
+
+			var imglist = document.querySelector("#info-list");
+			var clone = document.importNode(listitem.content, true);
+
+			imglist.append(clone);
+		}
+
+		function generateImageView(imgname, src) {
+			var imageView = document.querySelector("#image-view");
+			imageView.content.querySelector("img").src = src;
+			console.log(imageView.content.querySelector("div.image-view").datalist);
+			imageView.content.querySelector("div.image-view").dataset.imgname = imgname;
+			imageView.content.querySelector("textarea").setAttribute("name", imgname);
+
+			var container = document.querySelector("#image-review");
+			var clone = document.importNode(imageView.content, true);
+
+			container.append(clone);
+		}
+
+		function selectUploadedImage(event) {
+			console.log(event.target.dataset.imgname);
+			document.querySelectorAll('[data-imgname="' + visibleImageIndex  + '"]').forEach(function(el) {
+				el.classList.remove('selected');
+			});
+			visibleImageIndex = event.target.dataset.imgname;
+			document.querySelectorAll('[data-imgname="' + visibleImageIndex  + '"]').forEach(function(el) {
+				el.classList.add('selected');
+			});
+		}
+	</script>
+</body>
+</html>
