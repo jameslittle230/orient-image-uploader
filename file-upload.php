@@ -37,7 +37,7 @@ foreach($files['tmp_name'] as $file) {
 	$size = $files['size'][$index];
 
 	$name_sans_ext = substr($name, 0, strpos($name, '.')); // IMG_0752
-	$immediateImagedir = substr(md5(rand()), 0, 5) . '-' . $name_sans_ext; // 48d0a-IMG_0752
+	$immediateImagedir = $name_sans_ext; // 48d0a-IMG_0752
 	$imagedir = $dirpath . $immediateImagedir; // /opt/bitnami/apache2/htdocs/tmp/48d0a-IMG_0752
 
 	$oldmask = umask(0);
@@ -48,11 +48,6 @@ foreach($files['tmp_name'] as $file) {
 
 	file_put_contents($imagedir . '/' . $name_sans_ext . '_info.txt', "[$name]\n\n");
 
-	$cmd = "nohup ./convert-images.sh \"$imagedir\" \"$name\" \"$name_sans_ext\" &";
-
-	$output['cmds'][] = $cmd;
-
-
 	$output['images'][$immediateImagedir] = [
 		'src' => $relativeDirpath . $immediateImagedir . '/' . $name,
 		'filename' => $name
@@ -61,6 +56,4 @@ foreach($files['tmp_name'] as $file) {
 	$index++;
 }
 echo json_encode($output);
-foreach($output['cmds'] as $cmd) {
-	shell_exec($cmd);
-}
+exit();
